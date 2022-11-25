@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import scale
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 
 
 
@@ -14,18 +14,6 @@ digits = mnist_data[:, 1:]
 img_size = 28
 plt.imshow(digits[0].reshape(img_size, img_size))
 # plt.show()
-
-
-""" Point 1: exploratory analysis"""
-# describe can be used only on a dataFrame not on array 
-# print(mnist_data.describe()) 
-# # we can eliminate those variables where min and max coincide, because it means that for all observation that pixel is the same
-
-
-plt.hist(labels, bins=10) 
-# plt.show() 
-print(f'Percentage of correct predictions assigning all to class 1: {len(labels[labels==1])/len(labels)}')
-# evenly distributed 
 
 
 """" Point 2: ink feature and logistic regression """
@@ -49,13 +37,5 @@ ink = scale(ink).reshape(-1, 1) # reshape makes it a column vector
 model = LogisticRegression(random_state=0).fit(ink, labels)
 labels_predicted = model.predict(ink)
 print(confusion_matrix(labels, labels_predicted))
+print(f'Accuracy of model with ink feature: {accuracy_score(labels, labels_predicted)}')
 
-"""Point 3: new feature and new model"""
-# number of pixels
-# of the number of rows that have two lines with a gap in between
-nr_pixels = [ len([pix for pix in row if pix != 0]) for row in digits]
-
-new_features = np.hstack((ink, nr_pixels))
-model = LogisticRegression(random_state=0).fit(ink, labels)
-labels_predicted = model.predict(ink)
-print(confusion_matrix(labels, labels_predicted))
