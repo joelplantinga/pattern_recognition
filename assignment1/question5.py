@@ -17,23 +17,41 @@ def rescale_img(img):
     img = cv2.resize(img.astype(float), (14, 14), interpolation=cv2.INTER_CUBIC)
     return img.flatten()
 
+def delete_constant_columns(data):
 
+    data = data.transpose()
+    data = [row for row in data if len(np.unique(row)) > 1]
+    return np.asarray(data).transpose()
+
+def split_data(data, labels, index):
+
+    X_train = data[index,:]
+    y_train = labels[index] 
+    X_test = np.delete(data, index, axis=0)
+    y_test = np.delete(labels, index, axis=0)
+    
+    return X_train, y_train, X_test, y_test
+    
 
 """" Read the data"""
 mnist_data = pd.read_csv('mnist.csv').values
 labels = mnist_data[:, 0]
 digits = mnist_data[:, 1:]
 img_size = 28
-# plt.imshow(digits[0].reshape(img_size, img_size))
-# plt.show()
 
-reshaped_digits = np.array([rescale_img(row) for row in digits])
+# mnist_data = np.array([rescale_img(row) for row in digits])
+
+
+print(pd.DataFrame(mnist_data).describe()) 
+print(mnist_data.shape)
+
+mnist_data = delete_constant_columns(mnist_data)
+
+print(mnist_data.shape)
 
 index = np.random.choice(42000, 5000, replace=False)
-X_train = scale(reshaped_digits[index,:])
-Y_train = labels[index] 
-X_test = scale(np.delete(reshaped_digits, index, axis=0))
-Y_test = np.delete(labels, index, axis=0)
+
+X_train, y_train, X_test, y_test = split_data(mnist_data, labels, index)
 
 # logistic = LogisticRegression(solver= 'liblinear', random_state=0, penalty='l1')
 # C = np.arange(1, 1000, 1)
@@ -44,20 +62,22 @@ Y_test = np.delete(labels, index, axis=0)
 
 def objective(trial):
 
-    C = trial.suggest_int("C", 1, 101, 10)
+    C = trial.suggest_float("C", 0.001, 1000, log=True)
 
     logistic = LogisticRegression(solver= 'liblinear', random_state=0, C=C, penalty='l1')
 
-    score = cross_val_score(logistic, X_train, Y_train, n_jobs=-1)
+    # logistic.fit(X_train, y_train)
+    # return accuracy_score(y_test, logistic.predict(X_test))
+    
+    score = cross_val_score(logistic, X_train, y_train, n_jobs=-1)
     accuracy = score.mean()
-
     return accuracy
 
 
 study = optuna.create_study(direction="maximize")
-study.optimize(objective, n_trials=200)
-# found_param = study.trials_dataframe()
-# found_param.to_csv(f"results/preprocessing_{CLASSIFIER}_{NGRAM}_cv.csv")
+study.optimize(objective, n_trials=100)
+found_param = study.trials_dataframe()
+found_param.to_csv(f"results/tuning_logreg.csv")
 
 print(study.best_trial)
 
