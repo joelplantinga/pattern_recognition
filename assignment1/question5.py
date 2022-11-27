@@ -66,6 +66,8 @@ def objective(trial):
 
     logistic = LogisticRegression(solver= 'liblinear', random_state=0, C=C, penalty='l1')
     
+
+    # !! cross validation is called without shuffling on default in order to get the same results for every call
     score = cross_val_score(logistic, X_train, y_train, n_jobs=-1)
     accuracy = score.mean()
     return accuracy
