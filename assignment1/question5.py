@@ -42,8 +42,8 @@ img_size = 28
 # mnist_data = np.array([rescale_img(row) for row in digits])
 
 
-print(pd.DataFrame(mnist_data).describe()) 
-print(mnist_data.shape)
+# print(pd.DataFrame(mnist_data).describe()) 
+# print(mnist_data.shape)
 
 mnist_data = delete_constant_columns(mnist_data)
 
@@ -65,9 +65,6 @@ def objective(trial):
     C = trial.suggest_float("C", 0.001, 1000, log=True)
 
     logistic = LogisticRegression(solver= 'liblinear', random_state=0, C=C, penalty='l1')
-
-    # logistic.fit(X_train, y_train)
-    # return accuracy_score(y_test, logistic.predict(X_test))
     
     score = cross_val_score(logistic, X_train, y_train, n_jobs=-1)
     accuracy = score.mean()
