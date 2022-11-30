@@ -21,7 +21,6 @@ if __name__ == '__main__':
 
     """Point 4: fit the new model and compare with previous one"""
     # number of pixels
-    # of the number of rows that have two lines with a gap in between
     # nr_pixels = np.asarray([ len([pix for pix in row if pix != 0]) for row in digits])
     # nr_pixels = scale(nr_pixels).reshape(-1,1)
     # ink = np.array([sum(row) for row in digits])
@@ -36,5 +35,10 @@ if __name__ == '__main__':
     model = LogisticRegression().fit(new_features, labels)
     labels_predicted = model.predict(new_features)
     print(confusion_matrix(labels, labels_predicted))
+
+    df = pd.DataFrame(confusion_matrix(labels, labels_predicted))
+    df.to_csv('results/confusion_matrix_both.csv')
+
+
     print(f'Accuracy of model with gapped doubles and nr_pixels features: {accuracy_score(labels, labels_predicted)}')
 

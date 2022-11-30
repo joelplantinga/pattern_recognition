@@ -39,7 +39,7 @@ labels = mnist_data[:, 0]
 digits = mnist_data[:, 1:]
 img_size = 28
 
-# mnist_data = np.array([rescale_img(row) for row in digits])
+mnist_data = np.array([rescale_img(row) for row in digits])
 
 
 # print(pd.DataFrame(mnist_data).describe()) 
