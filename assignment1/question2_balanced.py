@@ -33,11 +33,11 @@ if __name__ == '__main__':
     digits = mnist_data[:, 1:]
     img_size = 28
 
-    n = 3795
-    mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
+    # n = 3795
+    # mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
 
-    labels = mnist_data[mask, 0]
-    digits = mnist_data[mask, 1:]
+    # labels = mnist_data[mask, 0]
+    # digits = mnist_data[mask, 1:]
 
     """" Point 2: ink feature and logistic regression """
 

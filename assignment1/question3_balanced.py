@@ -52,11 +52,11 @@ if __name__ == '__main__':
     img_size = 28
     
     
-    n = 3795
-    mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
+    # n = 3795
+    # mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
 
-    labels = mnist_data[mask, 0]
-    digits = mnist_data[mask, 1:]
+    # labels = mnist_data[mask, 0]
+    # digits = mnist_data[mask, 1:]
 
 
     doubles = create_double_att(digits, labels, show_plot=False).reshape(-1, 1)

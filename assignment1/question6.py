@@ -10,73 +10,64 @@ import optuna
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import cv2
 from sklearn.svm import SVC
-
-np.random.seed(0)
-
-def rescale_img(img):
-
-    img = img.reshape(28, 28)
-    img = cv2.resize(img.astype(float), (14, 14), interpolation=cv2.INTER_CUBIC)
-    return img.flatten()
-
-def delete_constant_columns(data):
-
-    data = data.transpose()
-    data = [row for row in data if len(np.unique(row)) > 1]
-    return np.asarray(data).transpose()
-
-def split_data(data, labels, index):
-
-    X_train = data[index,:]
-    y_train = labels[index] 
-    X_test = np.delete(data, index, axis=0)
-    y_test = np.delete(labels, index, axis=0)
-    
-    return X_train, y_train, X_test, y_test
-    
-
-"""" Read the data"""
-mnist_data = pd.read_csv('mnist.csv').values
-labels = mnist_data[:, 0]
-digits = mnist_data[:, 1:]
-img_size = 28
-
-mnist_data = delete_constant_columns(mnist_data)
-# print(mnist_data.shape)
-index = np.random.choice(42000, 5000, replace=False)
-
-X_train, y_train, X_test, y_test = split_data(mnist_data, labels, index)
+from sklearn.preprocessing import StandardScaler
+from question5 import rescale_img, delete_constant_columns, split_data    
 
 
 
-"""Fit the Logistic Regression with best parameter setting """
+if __name__ == "__main__":
 
-# tuning_logreg = pd.read_csv("results/tuning_logreg.csv")
-# best_C = tuning_logreg.loc[np.argmax(tuning_logreg['value']), 'params_C']
-
-# logreg_model = LogisticRegression(C=best_C, solver='saga', max_iter=700, penalty='l1', tol=0.001)
-# logreg_model.fit(X_train, y_train)
-
-# y_predict = logreg_model.predict(X_test)
-# print("------ Logistic Regression --------")
-# print(f"best parameter setting C={best_C}")
-
-# print(f"Accuracy: {accuracy_score(y_test, y_predict)}")
-# print(confusion_matrix(y_test, y_predict))
+    np.random.seed(0)
+    np.set_printoptions(precision=3)
 
 
-""" Fit the SVM with best parameter setting """
+    """" Read the data"""
+    mnist_data = pd.read_csv('mnist.csv').values
+    labels = mnist_data[:, 0]
+    digits = mnist_data[:, 1:]
 
-tuning_svm = pd.read_csv("results/tuning_svm.csv")
-best_C = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_C']
-best_gamma = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_gamma']
+    mnist_data = np.array([rescale_img(row) for row in digits])
 
-svm_model = SVC(C=best_C, gamma=best_gamma)
-svm_model.fit(X_train, y_train)
+    mnist_data = delete_constant_columns(mnist_data)
+    index = np.random.choice(42000, 5000, replace=False)
 
-y_pred = svm_model.predict(X_test)
-print("------ Support Vector Machines --------")
-print(f"best parameter setting C={best_C}, gamma={best_gamma}")
-print(f"Accuracy of SVM: {accuracy_score(y_test, y_pred)}")
-print(confusion_matrix(y_test, y_pred))
+
+    X_train, y_train, X_test, y_test = split_data(mnist_data, labels, index)
+
+    print(f"train distribution: {np.bincount(y_train) / 5000}")
+    print(f"test distribution: {np.bincount(y_test) / 37000}")
+
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+
+    """Fit the Logistic Regression with best parameter setting """
+
+    # tuning_logreg = pd.read_csv("results/tuning_logreg.csv")
+    # best_C = tuning_logreg.loc[np.argmax(tuning_logreg['value']), 'params_C']
+
+    # logreg_model = LogisticRegression(C=best_C, solver='saga', max_iter=700, penalty='l1', tol=0.001)
+    # logreg_model.fit(X_train, y_train)
+
+    # y_predict = logreg_model.predict(X_test)
+    # print("------ Logistic Regression --------")
+    # print(f"best parameter setting C={best_C}")
+
+    # print(f"Accuracy: {accuracy_score(y_test, y_predict)}")
+    # print(confusion_matrix(y_test, y_predict))
+
+
+    """ Fit the SVM with best parameter setting """
+
+    tuning_svm = pd.read_csv("results/tuning_svm1.csv")
+    best_C = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_C']
+    best_gamma = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_gamma']
+
+    svm_model = SVC(C=best_C, gamma=0.00000001, class_weight='balanced')
+    svm_model.fit(X_train, y_train)
+
+    y_pred = svm_model.predict(X_test)
+    print("------ Support Vector Machines --------")
+    print(f"best parameter setting C={best_C}, gamma={best_gamma}")
+    print(f"Accuracy of SVM: {accuracy_score(y_test, y_pred)}")
+    print(confusion_matrix(y_test, y_pred))
 
