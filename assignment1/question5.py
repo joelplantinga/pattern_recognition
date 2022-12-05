@@ -13,6 +13,8 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
+np.random.seed(0)
+
 def rescale_img(img):
 
     img = img.reshape(28, 28)
@@ -35,6 +37,7 @@ def split_data(data, labels, index):
     return X_train, y_train, X_test, y_test
     
 
+<<<<<<< HEAD
 
 
 
@@ -120,3 +123,66 @@ if __name__ == "__main__":
     # clf = RandomizedSearchCV(SVM, distributions, refit=True, random_state=0, scoring='accuracy')
     # model = clf.fit(X_train, y_train)
     # print(f" best estimator: {model.best_estimator_}, best score: {model.best_score_} ")
+=======
+"""" Read the data"""
+mnist_data = pd.read_csv('mnist.csv').values
+labels = mnist_data[:, 0]
+digits = mnist_data[:, 1:]
+img_size = 28
+
+mnist_data = np.array([rescale_img(row) for row in digits])
+
+
+mnist_data = delete_constant_columns(mnist_data)
+
+index = np.random.choice(42000, 5000, replace=False)
+
+X_train, y_train, X_test, y_test = split_data(mnist_data, labels, index)
+
+
+def objective(trial):
+
+    C = trial.suggest_float("C", 0.001, 10000, log=True)
+
+    # changed the solver to saga since it's the only one that supports l1 and multiclass problem
+    logistic = LogisticRegression(solver= 'saga', random_state=0, C=C, penalty='l1', max_iter= 700, tol=0.001)
+
+    # !! cross validation is called without shuffling on default in order to get the same results for every call
+    score = cross_val_score(logistic, X_train, y_train, n_jobs=-1)
+    accuracy = score.mean()
+    return accuracy
+
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=100)
+found_param = study.trials_dataframe()
+found_param.to_csv(f"results/tuning_logreg.csv")
+print(" Logistic Regression ")
+print(study.best_trial)
+
+
+
+
+def objectiveSVM(trial):
+
+    C = trial.suggest_float("C", 100000, 10000000, log=True)
+    gamma = trial.suggest_float("gamma", 0.0000001, 0.00001, log=True)
+
+    support_vector_machines = SVC(C=C, gamma=gamma)
+
+    # !! cross validation is called without shuffling on default in order to get the same results for every call
+    score = cross_val_score(support_vector_machines, X_train, y_train, n_jobs=-1)
+
+    accuracy = score.mean()
+    return accuracy
+
+
+
+studySVM = optuna.create_study(direction="maximize")
+studySVM.optimize(objectiveSVM, n_trials=100)
+found_paramSVM = studySVM.trials_dataframe()
+found_paramSVM.to_csv(f"results/tuning_SVM.csv")
+print(" Support Vector Machines ")
+print(studySVM.best_trial)
+
+>>>>>>> b8c730f830cba25b560ab24e5b55c231c721f4ab
