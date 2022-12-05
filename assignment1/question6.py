@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import scale
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 import optuna
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
-
+    X_test = scaler.transform(X_test)
     """Fit the Logistic Regression with best parameter setting """
 
     # tuning_logreg = pd.read_csv("results/tuning_logreg.csv")
@@ -58,16 +58,19 @@ if __name__ == "__main__":
 
     """ Fit the SVM with best parameter setting """
 
-    tuning_svm = pd.read_csv("results/tuning_svm1.csv")
+    tuning_svm = pd.read_csv("results/tuning_svm_def.csv")
     best_C = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_C']
     best_gamma = tuning_svm.loc[np.argmax(tuning_svm['value']), 'params_gamma']
 
-    svm_model = SVC(C=best_C, gamma=0.00000001, class_weight='balanced')
+    svm_model = SVC(C=best_C, gamma=0.001)
     svm_model.fit(X_train, y_train)
 
     y_pred = svm_model.predict(X_test)
     print("------ Support Vector Machines --------")
     print(f"best parameter setting C={best_C}, gamma={best_gamma}")
     print(f"Accuracy of SVM: {accuracy_score(y_test, y_pred)}")
+    print(classification_report(y_test, y_pred))
     print(confusion_matrix(y_test, y_pred))
+    df = pd.DataFrame(confusion_matrix(y_test, y_pred))
+    df.to_csv('results/confusion_matrix_svm.csv')
 

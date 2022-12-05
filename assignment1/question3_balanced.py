@@ -60,14 +60,17 @@ if __name__ == '__main__':
 
 
     doubles = create_double_att(digits, labels, show_plot=False).reshape(-1, 1)
+    print(f"train distribution: {np.bincount(labels) / 42000}")
 
     
     density_data = pd.DataFrame(data={'doubles': doubles.flatten(), 'digit': labels})
     density_data["value"]=1
     density_data = density_data.pivot_table(index='doubles', columns='digit', values='value', aggfunc=len, fill_value=0)
+    
+    density_data["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] = density_data["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] / 42000
     density_data.to_csv('results/density_double.csv')
-
     exit(0)
+    # exit(0)
     # data = [doubles[labels == i,] for i in [0,2,3,4,5,6,7,8,9]]
 
     # ax = sns.violinplot(data=data)
@@ -80,7 +83,7 @@ if __name__ == '__main__':
     # print(doubles.shape)
 
     # logistic regression with feature doubles
-    model = LogisticRegression(random_state=0, class_weight = 'balanced').fit(doubles, labels)
+    model = LogisticRegression(random_state=0).fit(doubles, labels)
     labels_predicted = model.predict(doubles)
 
 
