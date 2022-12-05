@@ -44,6 +44,12 @@ if __name__ == '__main__':
 
 
     ink = create_ink_feature(digits, labels, show_plot=False)
+
+    density_data = pd.DataFrame(data={'ink': [round(i/500)*500 for i in ink.flatten()], 'digit': labels})
+    density_data["value"]=1
+    density_data = density_data.pivot_table(index='ink', columns='digit', values='value', aggfunc=len, fill_value=0)
+    density_data.to_csv('results/density_ink.csv')
+
     # logistic regression with feature ink
     ink = scale(ink).reshape(-1, 1) # reshape makes it a column vector
     model = LogisticRegression(random_state=0).fit(ink, labels)

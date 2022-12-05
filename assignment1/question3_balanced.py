@@ -52,15 +52,22 @@ if __name__ == '__main__':
     img_size = 28
     
     
-    # n = 3795
-    # mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
+    n = 3795
+    mask = np.hstack([np.random.choice(np.where(labels == l)[0], n, replace=False) for l in np.unique(labels)])
 
-    # labels = mnist_data[mask, 0]
-    # digits = mnist_data[mask, 1:]
+    labels = mnist_data[mask, 0]
+    digits = mnist_data[mask, 1:]
 
 
     doubles = create_double_att(digits, labels, show_plot=False).reshape(-1, 1)
 
+    
+    density_data = pd.DataFrame(data={'doubles': doubles.flatten(), 'digit': labels})
+    density_data["value"]=1
+    density_data = density_data.pivot_table(index='doubles', columns='digit', values='value', aggfunc=len, fill_value=0)
+    density_data.to_csv('results/density_double.csv')
+
+    exit(0)
     # data = [doubles[labels == i,] for i in [0,2,3,4,5,6,7,8,9]]
 
     # ax = sns.violinplot(data=data)
